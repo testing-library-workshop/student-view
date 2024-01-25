@@ -1,0 +1,67 @@
+.App {
+  text-align: center;
+  font-size: 1rem;
+}
+
+.App h1 {
+  font-size: 4rem;
+}
+
+.App main {
+  min-width: 300px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.App input[type="text"] {
+  width: 100%;
+  padding: 1rem;
+}
+
+.App ul {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background-color: black;
+  border: 2px solid black
+}
+.App li{
+  background-color: white;
+}
+
+li.completed {
+  font-style: italic;
+  text-decoration: line-through;
+}
+
+.inputsRow {
+  display: flex;
+}
+
+.filterBar {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  padding: 5px 0;
+  align-items: center;
+}
+
+.filterBar button {
+  padding: 8px 3px;
+  width: 90px;
+  border: 1px solid lightblue;
+}
+.filterBar button.active {
+  border: 1px solid black;
+  font-weight: bold;
+}
+
+div.spacer {
+  padding-top: 20px;
+}
+
+button.saveBtn{
+  padding: 15px;
+}

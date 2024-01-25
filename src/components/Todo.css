@@ -1,0 +1,22 @@
+li {
+  display: flex;
+  justify-content: space-between;
+  list-style-type: none;
+  padding: 1rem;
+  max-width: 100%;
+}
+
+.App input[type="checkbox"] {
+  scale: 2;
+}
+.App input[type="date"] {
+  width: 38%;
+  text-align: center;
+}
+
+.flexContainer{
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  text-align: left;
+  width: 87%;
+}
