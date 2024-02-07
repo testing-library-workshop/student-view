@@ -5,10 +5,9 @@ import "./Todo.css";
 export default function Todo({ todoData, removeSelf, toggleIsCompleted }) {
   const { text, date, isCompleted } = todoData;
 
-  const isCompletedOrOutdated = isCompleted;
   return (
-    <li className={isCompletedOrOutdated ? "completed" : ""}>
-      <input type="checkbox" checked={isCompletedOrOutdated} onChange={toggleIsCompleted} />
+    <li className={isCompleted ? "completed" : ""}>
+      <input type="checkbox" checked={isCompleted} onChange={toggleIsCompleted} />
       <div className="flexContainer">
         <span>{text}</span>
         <span>{date}</span>

@@ -2,6 +2,8 @@ import React from "react";
 import { filterStates, todosActions } from "../reducer";
 
 export default function FilterBar({ totalItems, dispatch, filter }) {
+  if (totalItems < 0) throw new Error('mensaje');
+
   return (
     <div className="filterBar">
       <span>{`${totalItems} item${totalItems !== 1 ? "s" : ""} left`}</span>
