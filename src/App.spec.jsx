@@ -1,20 +1,21 @@
 import { render, screen } from "@testing-library/react";
 import App from "./App";
 import useLocalStorage from "./useLocalStorage";
-import { mockTodo } from "./mocks";
+import {  todoNotCompleted, todoCompleted, todoCaducado } from "./mocks";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("./useLocalStorage");
 
-beforeEach(() => {
-  jest.mocked(useLocalStorage).mockReturnValue([[], jest.fn()]);
-});
-
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
 describe("App", () => {
+
+  beforeEach(() => {
+    jest.mocked(useLocalStorage).mockReturnValue([[], jest.fn()]);
+  });
+  
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("debería renderizar el heading", () => {
     render(<App />);
     const headingTitle = screen.getByRole("heading", { name: /todos/i });
@@ -39,7 +40,7 @@ describe("App", () => {
     expect(filterBarText).toBeVisible();
   });
   it("debería renderizar la lista inicial de todos cargados del localStorage", () => {
-    const mockTodoList = [mockTodo, mockTodo];
+    const mockTodoList = [todoNotCompleted, todoNotCompleted];
     jest.mocked(useLocalStorage).mockReturnValue([mockTodoList, jest.fn()]);
     render(<App />);
 
@@ -57,7 +58,7 @@ describe("App", () => {
   });
 
   it("Al añadir un todo desde el input debe aparecer el último en la lista", () => {
-    jest.mocked(useLocalStorage).mockReturnValue([[mockTodo, mockTodo, mockTodo], jest.fn()]);
+    jest.mocked(useLocalStorage).mockReturnValue([[todoNotCompleted, todoNotCompleted, todoNotCompleted], jest.fn()]);
     render(<App />);
     const todoInput = screen.getByPlaceholderText(/what/i);
     userEvent.type(todoInput, "My todo{Enter}");
@@ -66,7 +67,7 @@ describe("App", () => {
   });
 
   it("Al poner un título y una fecha y pulsar enter debe aparecer el último en la lista", () => {
-    jest.mocked(useLocalStorage).mockReturnValue([[mockTodo, mockTodo, mockTodo], jest.fn()]);
+    jest.mocked(useLocalStorage).mockReturnValue([[todoNotCompleted, todoNotCompleted, todoNotCompleted], jest.fn()]);
     render(<App />);
     const todoInput = screen.getByPlaceholderText(/what/i);
     const todoDate = screen.getByPlaceholderText(/when/i);
@@ -79,7 +80,7 @@ describe("App", () => {
   });
 
   it("Al poner un título y con fecha anterior debe aparecer el checbox marcado", () => {
-    jest.mocked(useLocalStorage).mockReturnValue([[mockTodo, mockTodo, mockTodo], jest.fn()]);
+    jest.mocked(useLocalStorage).mockReturnValue([[todoNotCompleted, todoNotCompleted, todoNotCompleted], jest.fn()]);
     let dateSpyNow = jest.spyOn(Date, "now").mockReturnValue(new Date("2024-01-01").getTime());
     render(<App />);
     const todoInput = screen.getByPlaceholderText(/what/i);
@@ -93,7 +94,7 @@ describe("App", () => {
   });
 
   it("debería borrar el último de la lista", () => {
-    const mockTodoList = [mockTodo, mockTodo, mockTodo];
+    const mockTodoList = [todoNotCompleted, todoNotCompleted, todoNotCompleted];
     jest.mocked(useLocalStorage).mockReturnValue([mockTodoList, jest.fn()]);
     render(<App />);
     const deleteBtns = screen.getAllByRole("button", { name: /x/i });
@@ -103,4 +104,115 @@ describe("App", () => {
     const todos = screen.getAllByRole("listitem");
     expect(todos.length).toBe(mockTodoList.length - 1);
   });
+
+  describe('cuando hacemos click en checkbox', ()=>{
+    beforeEach(() => {
+      jest.mocked(useLocalStorage).mockReturnValue([[], jest.fn()]);
+    });
+    
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+    
+    it("Deberia cambiar a checked", () => {
+      const mockTodoList = [todoNotCompleted, todoNotCompleted, todoNotCompleted];
+      jest.mocked(useLocalStorage).mockReturnValue([mockTodoList, jest.fn()]);
+      render(<App />);
+      const inputChecks = screen.getAllByRole("checkbox")
+  
+      expect(inputChecks.at(-1)).not.toBeChecked()
+  
+      userEvent.click(inputChecks.at(-1))
+  
+      expect(inputChecks.at(-1)).toBeChecked()
+    });
+  
+    it("debría cambiar a not checked si la fecha del todo aún no ha caducado", () => {
+      const todoDate = todoCompleted.date
+      // const oneYearLater = new Date(todoDate).setFullYear(new Date(todoDate).getFullYear() + 1)
+      // console.log(oneYearLater)
+      // let dateSpyNow = jest.spyOn(Date, "now").mockReturnValue(oneYearLater);
+      const mockTodoList = [todoCompleted];
+      jest.mocked(useLocalStorage).mockReturnValue([mockTodoList, jest.fn()]);
+      render(<App />);
+      const inputChecks = screen.getAllByRole("checkbox")
+      expect(inputChecks.at(-1)).toBeChecked()
+      
+      userEvent.click(inputChecks.at(-1))
+      
+      expect(inputChecks.at(-1)).not.toBeChecked();
+
+      // dateSpyNow.mockClear();
+    });
+
+    it("No debría desmarcarse si la fecha está caducada", () => {
+      const mockTodoList = [todoCaducado, todoCaducado];
+      jest.mocked(useLocalStorage).mockReturnValue([mockTodoList, jest.fn()]);
+      render(<App />);
+      const inputChecks = screen.getAllByRole("checkbox")
+      expect(inputChecks.at(-1)).toBeChecked()
+      
+      userEvent.click(inputChecks.at(-1))
+      
+      expect(inputChecks.at(-1)).toBeChecked()
+    });
+
+    describe('Filtrado de todos', () => {
+      it('Comprobar que cuando filtramos por completed se actualiza la lista de todos correctamente', () => {
+        const mockTodoList = [todoNotCompleted, todoCompleted, todoCaducado];
+        jest.mocked(useLocalStorage).mockReturnValue([mockTodoList, jest.fn()]);
+        const dateSpyNow = jest.spyOn(Date, "now").mockReturnValue(new Date("2024-01-01").getTime());
+        render(<App />);
+        const todosList = screen.getAllByRole('listitem');
+        expect(todosList.length).toBe(3);
+
+        const filterCompletedButton = screen.getByRole('button', {name: /completed/i});
+        userEvent.click(filterCompletedButton);
+
+        expect(screen.getAllByRole('listitem').length).toBe(2);
+        dateSpyNow.mockClear();
+      });
+
+      it('Comprobar que cuando filtramos por no completed se actualiza la lista de todos correctamente', () => {
+        const mockTodoList = [todoCompleted, todoNotCompleted, todoNotCompleted];
+        jest.mocked(useLocalStorage).mockReturnValue([mockTodoList, jest.fn()]);
+        const dateSpyNow = jest.spyOn(Date, "now").mockReturnValue(new Date("2024-01-01").getTime());
+        render(<App />);
+        const todosList = screen.getAllByRole('listitem');
+        expect(todosList.length).toBe(3);
+
+        const filterCompletedButton = screen.getByRole('button', {name: /active/i});
+        userEvent.click(filterCompletedButton);
+
+        expect(screen.getAllByRole('listitem').length).toBe(2);
+        dateSpyNow.mockClear();
+      });
+
+    });
+    
+  });
+  it('deberia llamar al setLocalStorage con la lista de todos en ese momento', ()=>{
+    const mockedSetLocalStorage = jest.fn();
+    jest.mocked(useLocalStorage).mockReturnValue([[todoCompleted, todoNotCompleted], mockedSetLocalStorage]);
+    render(<App/>)
+    const saveBtn = screen.getByRole('button', {name: /Save Todos/i});
+
+    userEvent.click(saveBtn);
+
+    expect(mockedSetLocalStorage).toHaveBeenCalledTimes(1);
+    expect(mockedSetLocalStorage).toHaveBeenCalledWith([todoCompleted, todoNotCompleted]);
+  });
+
+  it('deberia aparecer una alerta si intentamos borrar un todo', ()=>{
+    const alertMock = jest.spyOn(window,'alert'); 
+    jest.mocked(useLocalStorage).mockReturnValue([[todoCompleted, todoNotCompleted], jest.fn()]);
+    render(<App/>)
+
+    const saveBtn = screen.getAllByRole('button', {name: /x/i})[0];
+    userEvent.click(saveBtn);
+
+    expect(alertMock).toHaveBeenCalledTimes(1);
+  })
+
+  
 });

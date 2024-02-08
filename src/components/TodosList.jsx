@@ -12,7 +12,9 @@ export default function TodosList({ todos, dispatch }) {
             <Todo
               key={idx}
               todoData={todoData}
-              removeSelf={() => dispatch({ type: todosActions.removeTodo, payload: idx })}
+              removeSelf={() => {
+                alert()
+                dispatch({ type: todosActions.removeTodo, payload: idx })}}
               toggleIsCompleted={() => dispatch({ type: todosActions.toggleIsCompleted, payload: idx })}
             />
           ))}

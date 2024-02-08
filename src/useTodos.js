@@ -11,7 +11,10 @@ export default function useTodos(initialTodos = []) {
   });
 
   useEffect(() => {
-    dispatch({ type: todosActions.loadTodos, payload: savedTodos || initialTodos });
+    dispatch({
+      type: todosActions.loadTodos,
+      payload: Array.isArray(savedTodos) && savedTodos.length ? savedTodos : initialTodos,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
